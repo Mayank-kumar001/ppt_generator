@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ProtectedHomeRouteImport } from './routes/_protected/home'
+import { Route as HelloIndexRouteImport } from './routes/hello/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,10 +26,24 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const ProtectedHomeRoute = ProtectedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const HelloIndexRoute = HelloIndexRouteImport.update({
+  id: '/hello/',
+  path: '/hello/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -37,31 +54,48 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
+  '/home': typeof ProtectedHomeRoute
+  '/hello/': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
+  '/home': typeof ProtectedHomeRoute
+  '/hello': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteRouteWithChildren
+  '/_protected': typeof ProtectedRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
+  '/_protected/home': typeof ProtectedHomeRoute
+  '/hello/': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/api/auth/$'
+  fullPaths: '/' | '/login' | '/home' | '/hello/' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/api/auth/$'
-  id: '__root__' | '/' | '/_auth' | '/_auth/login' | '/api/auth/$'
+  to: '/' | '/login' | '/home' | '/hello' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/_protected'
+    | '/_auth/login'
+    | '/_protected/home'
+    | '/hello/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
+  HelloIndexRoute: typeof HelloIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -81,12 +115,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_auth/login': {
       id: '/_auth/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/_protected/home': {
+      id: '/_protected/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof ProtectedHomeRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/hello/': {
+      id: '/hello/'
+      path: '/hello'
+      fullPath: '/hello/'
+      preLoaderRoute: typeof HelloIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -110,9 +165,23 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface ProtectedRouteRouteChildren {
+  ProtectedHomeRoute: typeof ProtectedHomeRoute
+}
+
+const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
+  ProtectedHomeRoute: ProtectedHomeRoute,
+}
+
+const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
+  ProtectedRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
+  HelloIndexRoute: HelloIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
