@@ -14,7 +14,7 @@ export function Navbar() {
         router.navigate({ to: '/login' })
     }
   return (
-    <div className="flex justify-between items-center  min-w-6xl h-fit py-1">
+    <div className="flex w-full max-w-6xl min-w-0 justify-between items-center h-fit px-4 py-1">
       <div className="font-semibold text-6xl text-[#c70036] tracking-tighter">
         DELTA
       </div>
