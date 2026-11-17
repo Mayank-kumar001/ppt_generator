@@ -14,6 +14,7 @@ import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedHomeRouteImport } from './routes/_protected/home'
+import { Route as ApiInngestRouteImport } from './routes/api/inngest'
 import { Route as HelloIndexRouteImport } from './routes/hello/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -40,6 +41,11 @@ const ProtectedHomeRoute = ProtectedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ApiInngestRoute = ApiInngestRouteImport.update({
+  id: '/api/inngest',
+  path: '/api/inngest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelloIndexRoute = HelloIndexRouteImport.update({
   id: '/hello/',
   path: '/hello/',
@@ -55,6 +61,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/home': typeof ProtectedHomeRoute
+  '/api/inngest': typeof ApiInngestRoute
   '/hello/': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/home': typeof ProtectedHomeRoute
+  '/api/inngest': typeof ApiInngestRoute
   '/hello': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -72,14 +80,16 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_protected/home': typeof ProtectedHomeRoute
+  '/api/inngest': typeof ApiInngestRoute
   '/hello/': typeof HelloIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/home' | '/hello/' | '/api/auth/$'
+  fullPaths:
+    '/' | '/login' | '/home' | '/api/inngest' | '/hello/' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/home' | '/hello' | '/api/auth/$'
+  to: '/' | '/login' | '/home' | '/api/inngest' | '/hello' | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/_auth/login'
     | '/_protected/home'
+    | '/api/inngest'
     | '/hello/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -95,6 +106,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
+  ApiInngestRoute: typeof ApiInngestRoute
   HelloIndexRoute: typeof HelloIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -135,6 +147,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/home'
       preLoaderRoute: typeof ProtectedHomeRouteImport
       parentRoute: typeof ProtectedRouteRoute
+    }
+    '/api/inngest': {
+      id: '/api/inngest'
+      path: '/api/inngest'
+      fullPath: '/api/inngest'
+      preLoaderRoute: typeof ApiInngestRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/hello/': {
       id: '/hello/'
@@ -181,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
+  ApiInngestRoute: ApiInngestRoute,
   HelloIndexRoute: HelloIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
