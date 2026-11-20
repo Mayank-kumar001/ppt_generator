@@ -1,14 +1,25 @@
 import { Button } from "#/components/ui/button";
 import { Label } from "#/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select";
 import { Slider } from "#/components/ui/slider";
 import { Textarea } from "#/components/ui/textarea";
+import { toast } from "#/components/ui/toast";
+import { createPresentation } from "#/features/presentations/actions/presentation-mutation";
+import { listPresentations } from "#/features/presentations/api/presentation-query";
 import {
   LAYOUT_OPTIONS,
   SLIDE_STYLES,
   TONE_OPTIONS,
 } from "#/features/presentations/constants/presentation-options";
-import { createFileRoute } from "@tanstack/react-router";
+import { presentationQueryKeys } from "#/features/presentations/hooks/query-key";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Wand2 } from "lucide-react";
 import { useState } from "react";
 
@@ -24,9 +35,11 @@ type HomeFormState = {
   layout: (typeof LAYOUT_OPTIONS)[number]["value"];
 };
 
-const handleGenerate = () => {}
+
 
 function RouteComponent() {
+   const queryClient = useQueryClient()
+     const navigate = useNavigate()
   const [form, setForm] = useState<HomeFormState>({
     content: "",
     slideCount: 8,
@@ -34,6 +47,56 @@ function RouteComponent() {
     tone: "formal",
     layout: "balanced",
   });
+
+  // const { data: presentations = [], isPending: listPending } = useQuery({
+  //   queryKey: presentationQueryKeys.list(),
+  //   queryFn: () => listPresentations(),
+  // })
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      createPresentation({
+        data: {
+          prompt: form.content.trim(),
+          slideCount: form.slideCount,
+          style: form.style,
+          tone: form.tone,
+          layout: form.layout,
+        },
+      }),
+    onSuccess: (presentation) => {
+      toast.add({
+            type: "success",
+            description: "Presentation has been created",
+          })
+          queryClient.invalidateQueries({ queryKey: presentationQueryKeys.list() })
+          navigate({
+        to: '/presentations/$presentationId',
+        params: { presentationId: presentation.id },
+      })
+
+        
+    },
+    onError: (error) => {
+      toast.add({
+            type: "error",
+            description: error instanceof Error ? error.message : 'Could not create presentation',
+          })
+    },
+  });
+
+
+  const handleGenerate = () => {
+    if (!form.content.trim()) {
+      toast.add({
+        type: "warning",
+        description: "Please enter your content first",
+      });
+      return
+    }
+    createMutation.mutate()
+  }
+
   return (
     <div className="h-full max-w-6xl overflow-y-auto flex flex-col items-center px-4 py-8">
       {/* header */}
@@ -67,124 +130,119 @@ function RouteComponent() {
           </div>
         </div>
         {/* Options grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Slide count */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            Slides: {form.slideCount}
-          </Label>
-          <Slider
-            value={[form.slideCount]}
-            onValueChange={(value) => {
-              const slideCount = Array.isArray(value) ? value[0] : value;
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Slide count */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Slides: {form.slideCount}
+            </Label>
+            <Slider
+              value={[form.slideCount]}
+              onValueChange={(value) => {
+                const slideCount = Array.isArray(value) ? value[0] : value;
 
-              if (typeof slideCount === "number") {
+                if (typeof slideCount === "number") {
+                  setForm((s) => ({
+                    ...s,
+                    slideCount,
+                  }));
+                }
+              }}
+              min={3}
+              max={20}
+              step={1}
+              className="py-2"
+            />
+          </div>
+          {/* Style */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Style</Label>
+            <Select
+              value={form.style}
+              onValueChange={(value) =>
                 setForm((s) => ({
                   ...s,
-                  slideCount,
-                }));
+                  style: value as HomeFormState["style"],
+                }))
               }
-            }}
-            min={3}
-            max={20}
-            step={1}
-            className="py-2"
-          />
-        </div>
-        {/* Style */}
-        <div className="space-y-2">
-              <Label className="text-sm font-medium">Style</Label>
-              <Select
-                value={form.style}
-                onValueChange={(value) =>
-                  setForm((s) => ({
-                    ...s,
-                    style: value as HomeFormState['style'],
-                  }))
-                }
-              >
-                <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass">
-                  {SLIDE_STYLES.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      {s.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            >
+              <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass">
+                {SLIDE_STYLES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Tone */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Tone</Label>
-              <Select
-                value={form.tone}
-                onValueChange={(value) =>
-                  setForm((s) => ({
-                    ...s,
-                    tone: value as HomeFormState['tone'],
-                  }))
-                }
-              >
-                <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass">
-                  {TONE_OPTIONS.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Tone */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Tone</Label>
+            <Select
+              value={form.tone}
+              onValueChange={(value) =>
+                setForm((s) => ({
+                  ...s,
+                  tone: value as HomeFormState["tone"],
+                }))
+              }
+            >
+              <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass">
+                {TONE_OPTIONS.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Layout */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Layout</Label>
-              <Select
-                value={form.layout}
-                onValueChange={(value) =>
-                  setForm((s) => ({
-                    ...s,
-                    layout: value as HomeFormState['layout'],
-                  }))
-                }
-              >
-                <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass">
-                  {LAYOUT_OPTIONS.map((l) => (
-                    <SelectItem key={l.value} value={l.value}>
-                      {l.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          
+          {/* Layout */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Layout</Label>
+            <Select
+              value={form.layout}
+              onValueChange={(value) =>
+                setForm((s) => ({
+                  ...s,
+                  layout: value as HomeFormState["layout"],
+                }))
+              }
+            >
+              <SelectTrigger className="bg-background/50 border-border/50 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass">
+                {LAYOUT_OPTIONS.map((l) => (
+                  <SelectItem key={l.value} value={l.value}>
+                    {l.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Generate button */}
           <div className="flex justify-end pt-1">
             <Button
               size="lg"
               onClick={handleGenerate}
-              // disabled={createMut.isPending || !form.content.trim()}
+              disabled={createMutation.isPending || !form.content.trim()}
               className="rounded-xl px-8 gap-2 font-semibold"
             >
-              
-                  <Wand2 className="size-5" />
-                  Generate PPT
-              
+              <Wand2 className="size-5" />
+              Generate PPT
             </Button>
           </div>
         </div>
       </div>
-      
-
-      </div>
+    </div>
   );
 }

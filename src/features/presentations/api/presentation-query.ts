@@ -17,11 +17,11 @@ export const getPersentation = createServerFn({ method: "GET" })
 })
 
 
-export const getPersentationWithSlides = createServerFn({ method: "GET" })
+export const getPresentationWithSlides = createServerFn({ method: "GET" })
 .validator(presentationIdInputSchema)
 .middleware([authCheckMiddleware])
 .handler(async ({ data, context }) => {
-    const { userId } = context;
+    const { userId } = context;``
     const presentation = await prisma.presentation.findFirst({
         where: { id: data.id, userId },
         include: {

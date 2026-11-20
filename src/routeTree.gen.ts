@@ -16,6 +16,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedHomeRouteImport } from './routes/_protected/home'
 import { Route as ApiInngestRouteImport } from './routes/api/inngest'
 import { Route as HelloIndexRouteImport } from './routes/hello/index'
+import { Route as ProtectedPresentationsPresentationIdRouteImport } from './routes/_protected/presentations.$presentationId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -51,6 +52,12 @@ const HelloIndexRoute = HelloIndexRouteImport.update({
   path: '/hello/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedPresentationsPresentationIdRoute =
+  ProtectedPresentationsPresentationIdRouteImport.update({
+    id: '/presentations/$presentationId',
+    path: '/presentations/$presentationId',
+    getParentRoute: () => ProtectedRouteRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof ProtectedHomeRoute
   '/api/inngest': typeof ApiInngestRoute
   '/hello/': typeof HelloIndexRoute
+  '/presentations/$presentationId': typeof ProtectedPresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -71,6 +79,7 @@ export interface FileRoutesByTo {
   '/home': typeof ProtectedHomeRoute
   '/api/inngest': typeof ApiInngestRoute
   '/hello': typeof HelloIndexRoute
+  '/presentations/$presentationId': typeof ProtectedPresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -82,14 +91,28 @@ export interface FileRoutesById {
   '/_protected/home': typeof ProtectedHomeRoute
   '/api/inngest': typeof ApiInngestRoute
   '/hello/': typeof HelloIndexRoute
+  '/_protected/presentations/$presentationId': typeof ProtectedPresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/home' | '/api/inngest' | '/hello/' | '/api/auth/$'
+    | '/'
+    | '/login'
+    | '/home'
+    | '/api/inngest'
+    | '/hello/'
+    | '/presentations/$presentationId'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/home' | '/api/inngest' | '/hello' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/home'
+    | '/api/inngest'
+    | '/hello'
+    | '/presentations/$presentationId'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -99,6 +122,7 @@ export interface FileRouteTypes {
     | '/_protected/home'
     | '/api/inngest'
     | '/hello/'
+    | '/_protected/presentations/$presentationId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -162,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelloIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/presentations/$presentationId': {
+      id: '/_protected/presentations/$presentationId'
+      path: '/presentations/$presentationId'
+      fullPath: '/presentations/$presentationId'
+      preLoaderRoute: typeof ProtectedPresentationsPresentationIdRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -186,10 +217,13 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface ProtectedRouteRouteChildren {
   ProtectedHomeRoute: typeof ProtectedHomeRoute
+  ProtectedPresentationsPresentationIdRoute: typeof ProtectedPresentationsPresentationIdRoute
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedHomeRoute: ProtectedHomeRoute,
+  ProtectedPresentationsPresentationIdRoute:
+    ProtectedPresentationsPresentationIdRoute,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
